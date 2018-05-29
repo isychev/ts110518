@@ -10,18 +10,10 @@ var summator = function () {
     for (var _i = 0; _i < arguments.length; _i++) {
         args[_i] = arguments[_i];
     }
-    var sum = 0;
-    args.forEach(function (el) {
+    return args.reduce(function (result, el) {
         var digit = typeof el === 'string' ? Number(el) : el;
-        sum = sum + digit;
-    });
-    return sum;
-    // Почему то это решение не компилится
-    // Type 'string | number' is not assignable to type 'number'.
-    // return args.reduce((result: number, el: StringNumber): number => {
-    //     const digit: number = typeof el === 'string' ? Number(el) : el;
-    //     return result + digit;
-    // }, 0);
+        return result + digit;
+    }, 0);
 };
 var getUnique = function () {
     var args = [];
@@ -36,10 +28,35 @@ var getUnique = function () {
         return result;
     }, []);
 };
-// Сделано без учета спецсимволов
 var reversWords = function (str) {
-    return str.split(' ').map(function (word) {
-        return word.split('').reverse().join('');
+    return str
+        .split(' ')
+        // loop by words
+        .map(function (word) {
+        // regexp for letter
+        var regExpLetter = /[a-zA-Z]/;
+        // array of index spec chars, example [ 1, 5, 6]
+        var indexesSpecChar = word
+            .split('')
+            .reduce(function (result, el, index) {
+            return (regExpLetter.test(el) ? result : result.concat(index));
+        }, []);
+        return word
+            .split('')
+            // revers array of chars
+            .reverse()
+            // remove all spec chars
+            .filter(function (char) { return regExpLetter.test(char); })
+            // join result string
+            .reduce(function (result, char, index) {
+            // insert into result spec char from word by original position (indexesSpecChar)
+            if (indexesSpecChar.indexOf(index) > -1) {
+                indexesSpecChar.shift();
+                return result + word.charAt(index) + char;
+            }
+            return result + char;
+            // append spec symbol to end string
+        }, '') + indexesSpecChar.map(function (index) { return (word.charAt(index)); }).join('');
     }).join(' ');
 };
 console.log('isInArray');
@@ -49,4 +66,5 @@ console.log(summator(1, 2, 3, '4', 5));
 console.log('getUnique');
 console.log(getUnique(1, 1, false, 3, '4', false, 5, 5));
 console.log('reversWords');
-console.log(reversWords('asd ewq      ytr'));
+console.log(reversWords('a1sd e1wq      y1tr'));
+console.log(reversWords('a1sd123 e1wq123      y1tr123'));

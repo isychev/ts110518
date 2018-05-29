@@ -6,19 +6,10 @@ const isInArray = (arr: StringNumberBoolean[], ...args: StringNumberBoolean[]): 
 };
 
 const summator = (...args: StringNumber[]): number => {
-    let sum = 0;
-    args.forEach((el: StringNumber) => {
-        const digit: number = typeof el === 'string' ? Number(el) : el;
-        sum = sum + digit;
-    });
-    return sum;
-    // Почему то это решение не компилится
-    // Type 'string | number' is not assignable to type 'number'.
-    
-     // return args.reduce((result: number, el: StringNumber): number => {
-     //     const digit: number = typeof el === 'string' ? Number(el) : el;
-     //     return result + digit;
-     // }, 0);
+     return args.reduce<number>((result: number, el: StringNumber): number => {
+         const digit: number = typeof el === 'string' ? Number(el) : el;
+         return result + digit;
+     }, 0);
 };
 
 const getUnique = (...args: StringNumberBoolean[]): StringNumberBoolean[] => {
@@ -31,13 +22,36 @@ const getUnique = (...args: StringNumberBoolean[]): StringNumberBoolean[] => {
     }, []);
 };
 
-// Сделано без учета спецсимволов
 const reversWords = (str: string): string => {
-    return str.split(' ').map((word: string ) => {
-        return word.split('').reverse().join('');
+    return str
+        .split(' ')
+        // loop by words
+        .map((word: string ) => {
+        // regexp for letter
+        const regExpLetter: RegExp = /[a-zA-Z]/;
+        // array of index spec chars, example [ 1, 5, 6]
+        const indexesSpecChar = word
+            .split('')
+            .reduce((result: number[], el: string, index: number) =>
+                (regExpLetter.test(el) ? result : result.concat(index)), []);
+        return word
+            .split('')
+            // revers array of chars
+            .reverse()
+            // remove all spec chars
+            .filter((char: string) => regExpLetter.test(char))
+            // join result string
+            .reduce((result: string, char: string, index: number) => {
+                // insert into result spec char from word by original position (indexesSpecChar)
+                if (indexesSpecChar.indexOf(index) > -1) {
+                    indexesSpecChar.shift();
+                    return result + word.charAt(index) + char;
+                }
+                return result + char;
+                // append spec symbol to end string
+            }, '') + indexesSpecChar.map((index: number) => (word.charAt(index))).join('');
     }).join(' ');
 };
-
 
 console.log('isInArray');
 console.log(isInArray([false, 1, '2'], false, 1, '2'));
@@ -49,4 +63,5 @@ console.log('getUnique');
 console.log(getUnique(1, 1, false, 3, '4', false, 5, 5));
 
 console.log('reversWords');
-console.log(reversWords('asd ewq      ytr'));
+console.log(reversWords('a1sd e1wq      y1tr'));
+console.log(reversWords('a1sd123 e1wq123      y1tr123'));
